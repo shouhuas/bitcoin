@@ -30,13 +30,8 @@ using namespace std;
 
 static bool fCreateBlank;
 static map<string,UniValue> registers;
-static const int CONTINUE_EXECUTION=-1;
 
-//
-// This function returns either one of EXIT_ codes when it's expected to stop the process or
-// CONTINUE_EXECUTION when it's expected to continue further.
-//
-static int AppInitRawTx(int argc, char* argv[])
+static bool AppInitRawTx(int argc, char* argv[])
 {
     //
     // Parameters
@@ -94,13 +89,9 @@ static int AppInitRawTx(int argc, char* argv[])
         strUsage += HelpMessageOpt("set=NAME:JSON-STRING", _("Set register NAME to given JSON-STRING"));
         fprintf(stdout, "%s", strUsage.c_str());
 
-        if (argc < 2) {
-            fprintf(stderr, "Error: too few parameters\n");
-            return EXIT_FAILURE;
-        }
-        return EXIT_SUCCESS;
+        return false;
     }
-    return CONTINUE_EXECUTION;
+    return true;
 }
 
 static void RegisterSetJson(const string& key, const string& rawJson)
@@ -687,9 +678,8 @@ int main(int argc, char* argv[])
     SetupEnvironment();
 
     try {
-        int ret = AppInitRawTx(argc, argv);
-        if (ret != CONTINUE_EXECUTION)
-            return ret;
+        if(!AppInitRawTx(argc, argv))
+            return EXIT_FAILURE;
     }
     catch (const std::exception& e) {
         PrintExceptionContinue(&e, "AppInitRawTx()");

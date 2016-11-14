@@ -6,7 +6,6 @@
 
 #include "bantablemodel.h"
 #include "guiconstants.h"
-#include "guiutil.h"
 #include "peertablemodel.h"
 
 #include "chainparams.h"
@@ -209,7 +208,7 @@ QString ClientModel::formatClientStartupTime() const
 
 QString ClientModel::dataDir() const
 {
-    return GUIUtil::boostPathToQString(GetDataDir());
+    return QString::fromStdString(GetDataDir().string());
 }
 
 void ClientModel::updateBanlist()

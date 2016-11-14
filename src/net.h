@@ -543,9 +543,6 @@ public:
 
 
 class CNetMessage {
-private:
-    mutable CHash256 hasher;
-    mutable uint256 data_hash;
 public:
     bool in_data;                   // parsing header (false) or data (true)
 
@@ -572,8 +569,6 @@ public:
             return false;
         return (hdr.nMessageSize == nDataPos);
     }
-
-    const uint256& GetMessageHash() const;
 
     void SetVersion(int nVersionIn)
     {

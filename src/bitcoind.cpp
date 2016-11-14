@@ -92,7 +92,7 @@ bool AppInit(int argc, char* argv[])
         }
 
         fprintf(stdout, "%s", strUsage.c_str());
-        return true;
+        return false;
     }
 
     try
@@ -126,7 +126,7 @@ bool AppInit(int argc, char* argv[])
         if (fCommandLine)
         {
             fprintf(stderr, "Error: There is no RPC client functionality in bitcoind anymore. Use the bitcoin-cli utility instead.\n");
-            exit(EXIT_FAILURE);
+            exit(1);
         }
         if (GetBoolArg("-daemon", false))
         {
@@ -177,5 +177,5 @@ int main(int argc, char* argv[])
     // Connect bitcoind signal handlers
     noui_connect();
 
-    return (AppInit(argc, argv) ? EXIT_SUCCESS : EXIT_FAILURE);
+    return (AppInit(argc, argv) ? 0 : 1);
 }

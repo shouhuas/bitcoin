@@ -28,7 +28,6 @@ using namespace std;
 
 static const char DEFAULT_RPCCONNECT[] = "127.0.0.1";
 static const int DEFAULT_HTTP_CLIENT_TIMEOUT=900;
-static const int CONTINUE_EXECUTION=-1;
 
 std::string HelpMessageCli()
 {
@@ -68,11 +67,7 @@ public:
 
 };
 
-//
-// This function returns either one of EXIT_ codes when it's expected to stop the process or
-// CONTINUE_EXECUTION when it's expected to continue further.
-//
-static int AppInitRPC(int argc, char* argv[])
+static bool AppInitRPC(int argc, char* argv[])
 {
     //
     // Parameters
@@ -90,35 +85,31 @@ static int AppInitRPC(int argc, char* argv[])
         }
 
         fprintf(stdout, "%s", strUsage.c_str());
-        if (argc < 2) {
-            fprintf(stderr, "Error: too few parameters\n");
-            return EXIT_FAILURE;
-        }
-        return EXIT_SUCCESS;
+        return false;
     }
     if (!boost::filesystem::is_directory(GetDataDir(false))) {
         fprintf(stderr, "Error: Specified data directory \"%s\" does not exist.\n", mapArgs["-datadir"].c_str());
-        return EXIT_FAILURE;
+        return false;
     }
     try {
         ReadConfigFile(GetArg("-conf", BITCOIN_CONF_FILENAME), mapArgs, mapMultiArgs);
     } catch (const std::exception& e) {
         fprintf(stderr,"Error reading configuration file: %s\n", e.what());
-        return EXIT_FAILURE;
+        return false;
     }
     // Check for -testnet or -regtest parameter (BaseParams() calls are only valid after this clause)
     try {
         SelectBaseParams(ChainNameFromCommandLine());
     } catch (const std::exception& e) {
         fprintf(stderr, "Error: %s\n", e.what());
-        return EXIT_FAILURE;
+        return false;
     }
     if (GetBoolArg("-rpcssl", false))
     {
         fprintf(stderr, "Error: SSL mode for RPC (-rpcssl) is no longer supported.\n");
-        return EXIT_FAILURE;
+        return false;
     }
-    return CONTINUE_EXECUTION;
+    return true;
 }
 
 
@@ -363,9 +354,8 @@ int main(int argc, char* argv[])
     }
 
     try {
-        int ret = AppInitRPC(argc, argv);
-        if (ret != CONTINUE_EXECUTION)
-            return ret;
+        if(!AppInitRPC(argc, argv))
+            return EXIT_FAILURE;
     }
     catch (const std::exception& e) {
         PrintExceptionContinue(&e, "AppInitRPC()");
