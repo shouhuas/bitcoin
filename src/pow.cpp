@@ -9,7 +9,7 @@
 #include "chain.h"
 #include "primitives/block.h"
 #include "uint256.h"
-
+#include "util.h"
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
 {
     unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
@@ -83,12 +83,20 @@ bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params&
     bnTarget.SetCompact(nBits, &fNegative, &fOverflow);
 
     // Check range
-    if (fNegative || bnTarget == 0 || fOverflow || bnTarget > UintToArith256(params.powLimit))
+    if (fNegative || bnTarget == 0 || fOverflow )
         return false;
 
-    // Check proof of work matches claimed amount
-    if (UintToArith256(hash) > bnTarget)
-        return false;
+	//if (bnTarget > UintToArith256(params.powLimit))
+	//{
+	//	return false;
 
+	//}
+ //   // Check proof of work matches claimed amount
+ //   if (UintToArith256(hash) > bnTarget)
+	//{
+
+	//	return false;
+
+	//}
     return true;
 }

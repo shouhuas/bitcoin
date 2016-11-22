@@ -98,6 +98,9 @@ UniValue getnetworkhashps(const JSONRPCRequest& request)
 
 UniValue generateBlocks(boost::shared_ptr<CReserveScript> coinbaseScript, int nGenerate, uint64_t nMaxTries, bool keepScript)
 {
+	LogPrintf("CreateNewBlock(): generateBlocks\n");
+
+cout<<"------------";
     static const int nInnerLoopCount = 0x10000;
     int nHeightStart = 0;
     int nHeightEnd = 0;
@@ -125,49 +128,55 @@ UniValue generateBlocks(boost::shared_ptr<CReserveScript> coinbaseScript, int nG
             ++pblock->nNonce;
             --nMaxTries;
         }
+		LogPrintf("3-----------\n");
         if (nMaxTries == 0) {
-            break;
+			;//   break;
         }
+		LogPrintf("2-----\n");
         if (pblock->nNonce == nInnerLoopCount) {
             continue;
         }
+		LogPrintf("1--\n");
         CValidationState state;
-        if (!ProcessNewBlock(state, Params(), NULL, pblock, true, NULL))
-            throw JSONRPCError(RPC_INTERNAL_ERROR, "ProcessNewBlock, block not accepted");
+		if (!ProcessNewBlock(state, Params(), NULL, pblock, true, NULL))
+			continue;;// throw JSONRPCError(RPC_INTERNAL_ERROR, "ProcessNewBlock, block not accepted");
         ++nHeight;
         blockHashes.push_back(pblock->GetHash().GetHex());
-
+		LogPrintf("CreateNewBd\n");
         //mark script as important because it was used at least for one coinbase output if the script came from the wallet
         if (keepScript)
         {
             coinbaseScript->KeepScript();
         }
+
+cout<<"------------";
     }
     return blockHashes;
 }
 
 UniValue generate(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() < 1 || request.params.size() > 2)
-        throw runtime_error(
-            "generate numblocks ( maxtries )\n"
-            "\nMine up to numblocks blocks immediately (before the RPC call returns)\n"
-            "\nArguments:\n"
-            "1. numblocks    (numeric, required) How many blocks are generated immediately.\n"
-            "2. maxtries     (numeric, optional) How many iterations to try (default = 1000000).\n"
-            "\nResult\n"
-            "[ blockhashes ]     (array) hashes of blocks generated\n"
-            "\nExamples:\n"
-            "\nGenerate 11 blocks\n"
-            + HelpExampleCli("generate", "11")
-        );
 
-    int nGenerate = request.params[0].get_int();
-    uint64_t nMaxTries = 1000000;
-    if (request.params.size() > 1) {
-        nMaxTries = request.params[1].get_int();
-    }
+	cout << "---a---------";
+	if (request.fHelp || request.params.size() < 1 || request.params.size() > 2)
+		throw runtime_error(
+		"generate numblocks ( maxtries )\n"
+		"\nMine up to numblocks blocks immediately (before the RPC call returns)\n"
+		"\nArguments:\n"
+		"1. gnumblocks    (numeric, required) How many blocks are generated immediately.\n"
+		"2. maxtries     (numeric, optional) How many iterations to try (default = 1000000).\n"
+		"\nResult\n"
+		"[ blockhashes ]     (array) hashes of blocks generated\n"
+		"\nExamples:\n"
+		"\nGenerate 11 blocks\n"
+		+ HelpExampleCli("generate", "11")
+		);
 
+	int nGenerate = request.params[0].get_int();
+	uint64_t nMaxTries = 1000000;
+	;//  if (request.params.size() > 1) {
+	;//    nMaxTries = request.params[1].get_int();
+	
     boost::shared_ptr<CReserveScript> coinbaseScript;
     GetMainSignals().ScriptForMining(coinbaseScript);
 
