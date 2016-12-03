@@ -968,6 +968,13 @@ void CConnman::AcceptConnection(const ListenSocket& hListenSocket) {
                 nInbound++;
     }
 
+	if (whitelisted)
+	{
+
+		LogPrint("net", "connectdion from 1 accepted\n");
+	}
+
+
     if (hSocket == INVALID_SOCKET)
     {
         int nErr = WSAGetLastError();

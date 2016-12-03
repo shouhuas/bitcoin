@@ -1655,12 +1655,13 @@ CAmount CWalletTx::GetAvailableCredit(bool fUseCache) const
         return 0;
 
     // Must wait until coinbase is safely deep enough in the chain before valuing it
-    if (IsCoinBase() && GetBlocksToMaturity() > 0)
-        return 0;
+   // if (IsCoinBase() && GetBlocksToMaturity() > 0)
+     //   return 0;
 
+     LogPrintf("1d transactions\n");
     if (fUseCache && fAvailableCreditCached)
         return nAvailableCreditCached;
-
+     LogPrintf("2ransactions\n");
     CAmount nCredit = 0;
     uint256 hashTx = GetHash();
     for (unsigned int i = 0; i < vout.size(); i++)

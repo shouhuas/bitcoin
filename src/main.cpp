@@ -5327,6 +5327,8 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
     else if (strCommand == NetMsgType::INV)
     {
+		
+                    LogPrint("net", "getheaders strCommand == NetMsgType::INV\n");
         vector<CInv> vInv;
         vRecv >> vInv;
         if (vInv.size() > MAX_INV_SZ)
@@ -6482,10 +6484,13 @@ bool SendMessages(CNode* pto, CConnman& connman)
 {
     const Consensus::Params& consensusParams = Params().GetConsensus();
     {
-        // Don't send anything until we get its version message
+      //  LogPrintf("WarningSendMessagesisted peer ping\n");
+			//Don't send anything until we get its version message
         if (pto->nVersion == 0)
             return true;
 
+		if (pto->fWhitelisted)
+ LogPrintf("---d------------\n");
         //
         // Message: ping
         //
@@ -6515,6 +6520,8 @@ bool SendMessages(CNode* pto, CConnman& connman)
             }
         }
 
+		if (pto->fWhitelisted)
+			LogPrintf("---d-d--d---------\n");
         TRY_LOCK(cs_main, lockMain); // Acquire cs_main for IsInitialBlockDownload() and CNodeState()
         if (!lockMain)
             return true;
@@ -6525,7 +6532,6 @@ bool SendMessages(CNode* pto, CConnman& connman)
             AdvertiseLocal(pto);
             pto->nNextLocalAddrSend = PoissonNextSend(nNow, AVG_LOCAL_ADDRESS_BROADCAST_INTERVAL);
         }
-
         //
         // Message: addr
         //
@@ -6742,6 +6748,7 @@ bool SendMessages(CNode* pto, CConnman& connman)
             BOOST_FOREACH(const uint256& hash, pto->vInventoryBlockToSend) {
                 vInv.push_back(CInv(MSG_BLOCK, hash));
                 if (vInv.size() == MAX_INV_SZ) {
+					LogPrintf("--MAX_INV_SZ-d---d---------\n");
                     connman.PushMessage(pto, NetMsgType::INV, vInv);
                     vInv.clear();
                 }
@@ -6788,6 +6795,7 @@ bool SendMessages(CNode* pto, CConnman& connman)
                     pto->filterInventoryKnown.insert(hash);
                     vInv.push_back(inv);
                     if (vInv.size() == MAX_INV_SZ) {
+						LogPrintf("--MAX_INV_SZ-d---d--D-------\n");
                         connman.PushMessage(pto, NetMsgType::INV, vInv);
                         vInv.clear();
                     }
@@ -6886,6 +6894,7 @@ bool SendMessages(CNode* pto, CConnman& connman)
                 pto->fDisconnect = true;
             }
         }
+		LogPrintf("-a2------\n");
 
         //
         // Message: getdata (blocks)
@@ -6909,12 +6918,13 @@ bool SendMessages(CNode* pto, CConnman& connman)
                 }
             }
         }
-
         //
         // Message: getdata (non-blocks)
         //
         while (!pto->fDisconnect && !pto->mapAskFor.empty() && (*pto->mapAskFor.begin()).first <= nNow)
         {
+
+			LogPrintf("-a2sd------\n");
             const CInv& inv = (*pto->mapAskFor.begin()).second;
             if (!AlreadyHave(inv))
             {
@@ -6932,9 +6942,13 @@ bool SendMessages(CNode* pto, CConnman& connman)
             }
             pto->mapAskFor.erase(pto->mapAskFor.begin());
         }
-        if (!vGetData.empty())
-            connman.PushMessage(pto, NetMsgType::GETDATA, vGetData);
+		if (!vGetData.empty())
+		{
+			LogPrintf("--GETDATA-d---d---------\n");
 
+			connman.PushMessage(pto, NetMsgType::GETDATA, vGetData);
+
+		}
         //
         // Message: feefilter
         //
